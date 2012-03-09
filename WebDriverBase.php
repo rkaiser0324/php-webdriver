@@ -147,6 +147,16 @@ abstract class WebDriverBase {
       curl_setopt($curl, $option, $value);
     }
 
+    //    curl_setopt($curl, CURLOPT_VERBOSE, "1");
+
+//    echo "calling curl with\n";
+//    print_r($params);
+//    echo "done with curl args\n";
+
+    //    echo "encoded curl args\n";
+    //    echo json_encode($params) . "\n";
+    //    echo "done with curl args\n";
+    
     $raw_results = trim(WebDriverEnvironment::CurlExec($curl));
     $info = curl_getinfo($curl);
 
@@ -163,6 +173,10 @@ abstract class WebDriverBase {
     curl_close($curl);
 
     $results = json_decode($raw_results, true);
+
+    //    echo "curl results\n";
+    //    print_r($results);
+    //    echo "done with curl results\n";
 
     $value = null;
     if (is_array($results) && array_key_exists('value', $results)) {
@@ -198,14 +212,14 @@ abstract class WebDriverBase {
           $webdriver_command));
       }
       $methods = $this->methods();
-      if (!is_array($methods[$webdriver_command])) {
-          throw new Exception(sprintf(
-            '%s is the only valid http method for %s.  %s is unsupported.',
-            $methods[$webdriver_command],
-            $webdriver_command,
-            $http_method));
-      }
-      if (!in_array($http_method, $methods[$webdriver_command])) {
+//      if (!is_array($methods[$webdriver_command])) {
+//          throw new Exception(sprintf(
+//            '%s is the only valid http method for %s.  %s is unsupported.',
+//            $methods[$webdriver_command],
+//            $webdriver_command,
+//            $http_method));
+//      }
+      if (!in_array($http_method, (array) $methods[$webdriver_command])) {
         throw new Exception(sprintf(
           '%s is not an available http method for the command %s.',
           $http_method,
@@ -216,6 +230,11 @@ abstract class WebDriverBase {
       $http_method = $this->getHTTPMethod($webdriver_command);
     }
 
+    if (!is_array($arguments)) {
+        throw new Exception(sprintf(
+          '%s /%s requires an array argument, not %s.',
+          $http_method,$webdriver_command,$arguments));
+    }
     $results = $this->curl(
       $http_method,
       '/' . $webdriver_command,
