@@ -28,7 +28,7 @@ class PHPUnitHelper
         PHPUnitHelper::$implicit_wait = $timeout_msec;
     }
 
-    public function assert_title($expected_title,$timeout_msec = "")
+    public function assert_title($expected_title_or_compare_func,$timeout_msec = "")
     {
         if ($timeout_msec == "") {
             $timeout_msec = PHPUnitHelper::$implicit_wait;
@@ -37,12 +37,21 @@ class PHPUnitHelper
         // wait) but it only waits for elements to exist,
         // not for particular values.  So if we want to make
         // sure the title has a value, wait a bit for it.
+
+        if (!is_callable($expected_title_or_compare_func,false,$expected_title))
+        {
+            // We didn't get a function to call so assume we
+            // got a string which is the exact title to look
+            // for
+            $expected_title = $expected_title_or_compare_func;
+        }
         echo "waiting " . $timeout_msec . " milliseconds for title to be \"" . $expected_title . "\"\n";
         $start_time = time();
         $end_time = $start_time + ($timeout_msec / 1000);
         do {
             $actual_title = $this->session->title();
-            if ($actual_title == $expected_title)
+            if ((is_callable($expected_title_or_compare_func) && $expected_title_or_compare_func($actual_title)) ||
+                ($actual_title == $expected_title_or_compare_func))
             {
                 return;
             }
