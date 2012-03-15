@@ -91,6 +91,23 @@ class PHPUnitHelper
         } while (time() < $end_time);
         PHPUnit_Framework_Assert::fail("timeout waiting for value of element \"" . $locate_using . "\":\"" . $locate_value . "\", last value: \"" . $this_value . "\"");
     }
+
+    public function wait_for_element_to_be_displayed($locate_using,$locate_value,$timeout_msec = "") {
+        if ($timeout_msec == "") {
+            $timeout_msec = PHPUnitHelper::$implicit_wait;
+        }
+        echo "waiting " . $timeout_msec . " milliseconds for \"" . $locate_using . ":" . $locate_value . "\" to be displayed\n";
+        $start_time = time();
+        $end_time = $start_time + ($timeout_msec / 1000);
+        $element = $this->session->element($locate_using,$locate_value);
+        do {
+            if ($element->displayed())
+            {
+                return;
+            }
+        } while (time() < $end_time);
+        PHPUnit_Framework_Assert::fail("timeout waiting for element \"" . $locate_using . "\":\"" . $locate_value . "\" to be visible\"");
+    }
     
     public function safe_click($element,$expected_title_after_click,$timeout_msec = "") {
         // For some reason asking Selenium to click isn't
